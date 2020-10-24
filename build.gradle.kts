@@ -1,5 +1,3 @@
-import org.gradle.jvm.tasks.Jar
-
 /*
  *    Copyright 2017 SixRQ Ltd.
  *
@@ -16,54 +14,38 @@ import org.gradle.jvm.tasks.Jar
  *    limitations under the License.
  */
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 group = "com.sixrq"
 version = "1.0-SNAPSHOT"
 
-buildscript {
-    repositories {
-        gradleScriptKotlin()
-        jcenter()
-    }
-
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.0")
-        classpath(kotlinModule("gradle-plugin"))
-        classpath("com.github.jengelman.gradle.plugins:shadow:1.2.4")
-    }
-}
-
 plugins {
+    kotlin("jvm") version "1.4.10"
     application
     groovy
-    java
-}
-
-apply {
-    plugin("kotlin")
-    plugin("com.github.johnrengelman.shadow")
 }
 
 repositories {
-    gradleScriptKotlin()
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    compile(kotlin("stdlib"))
-    compile("org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.0")
-    compile("org.codehaus.groovy:groovy-all:2.3.11")
-    compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2")
-    testCompile("org.spockframework:spock-core:1.0-groovy-2.4")
-    testCompile("junit:junit:4.11")
+    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.10")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10")
+    implementation("org.codehaus.groovy:groovy-all:2.3.11")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2")
+    testImplementation("org.spockframework:spock-core:1.0-groovy-2.4")
+    testImplementation(kotlin("test-junit"))
 }
 
-configure<ApplicationPluginConvention> {
-    mainClassName = "com.sixrq.kaxb.main.SchemaGenerator"
+tasks.withType<KotlinCompile>() {
+    kotlinOptions.jvmTarget = "1.8"
 }
+application.mainClass.set("com.sixrq.kaxb.main.SchemaGenerator")
 
-val jar: Jar by tasks
-jar.apply {
-    manifest.attributes.apply {
-        put("Main-Class", "com.sixrq.kaxb.main.SchemaGenerator")
+val jar by tasks.getting(Jar::class) {
+    manifest {
+        attributes["Main-Class"] = "com.sixrq.kaxb.main.SchemaGenerator"
     }
 }
